@@ -4,7 +4,6 @@
   "description": "Framework-independent PHP SDK for Identio authentication and social login APIs.",
   "type": "library",
   "license": "proprietary",
-  "version": "0.1.0",
   "require": {
     "php": "^8.2",
     "guzzlehttp/guzzle": "^7.8",
