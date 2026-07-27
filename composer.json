@@ -1,0 +1,31 @@
+{
+  "$schema": "https://getcomposer.org/schema.json",
+  "name": "identio/php-sdk",
+  "description": "Framework-independent PHP SDK for Identio authentication and social login APIs.",
+  "type": "library",
+  "license": "proprietary",
+  "version": "0.1.0",
+  "require": {
+    "php": "^8.2",
+    "guzzlehttp/guzzle": "^7.8",
+    "psr/log": "^3.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0 || ^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Identio\\Sdk\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Identio\\Sdk\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
