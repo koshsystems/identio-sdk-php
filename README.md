@@ -84,7 +84,7 @@ $values = [
 
 ## Social login
 
-Supported providers are Google, Yandex and VK.
+Supported providers are Google, Yandex, VK and Facebook.
 
 ```php
 use Identio\Sdk\Enum\SocialProvider;
@@ -98,7 +98,7 @@ $flow = new SocialFlowManager(
     session: new NativeSessionStore(),
 );
 
-$start = $flow->start(SocialProvider::Yandex);
+$start = $flow->start(SocialProvider::Facebook);
 header('Location: ' . $start->authorizeUrl);
 exit;
 ```
@@ -107,7 +107,7 @@ Callback:
 
 ```php
 $result = $flow->complete(
-    provider: SocialProvider::Yandex,
+    provider: SocialProvider::Facebook,
     code: $_GET['code'] ?? null,
     state: $_GET['state'] ?? null,
     vkDeviceId: $_GET['device_id'] ?? null,
@@ -121,7 +121,7 @@ When Identio returns `registrationRequired = true`, collect the mandatory profil
 
 ```php
 $result = $identio->social->completeRegistration(
-    provider: SocialProvider::Yandex,
+    provider: SocialProvider::Facebook,
     registrationToken: $result->registrationToken,
     values: $values,
 );

@@ -9,4 +9,5 @@ enum SocialProvider: string
     case Google = 'GOOGLE';
     case Yandex = 'YANDEX';
     case Vk = 'VK';
+    case Facebook = 'FACEBOOK';
 }

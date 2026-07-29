@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 
 final class SocialFlowManagerTest extends TestCase
 {
-    public function testSocialFlowStoresStateAndAuthenticatesCallback(): void
+    public function testFacebookSocialFlowStoresStateAndAuthenticatesCallback(): void
     {
         $mock = new MockHandler([
             new Response(200, ['Content-Type' => 'application/json'], json_encode([
@@ -45,8 +45,8 @@ final class SocialFlowManagerTest extends TestCase
         );
         $flow = new SocialFlowManager($client->social, new ArraySessionStore());
 
-        $start = $flow->start(SocialProvider::Yandex);
-        $result = $flow->complete(SocialProvider::Yandex, 'oauth-code', 'expected-state');
+        $start = $flow->start(SocialProvider::Facebook);
+        $result = $flow->complete(SocialProvider::Facebook, 'oauth-code', 'expected-state');
 
         self::assertSame('https://oauth.example/authorize', $start->authorizeUrl);
         self::assertTrue($result->isAuthenticated());
