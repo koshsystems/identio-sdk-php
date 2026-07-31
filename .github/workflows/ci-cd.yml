@@ -1,15 +1,6 @@
 name: Identio PHP SDK CI/CD
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - ".github/workflows/ci-cd.yml"
-      - "composer.json"
-      - "composer.lock"
-      - "phpunit.xml"
-      - "src/**"
-      - "tests/**"
   push:
     branches: [main]
     paths:
@@ -38,17 +29,11 @@ env:
 jobs:
   test:
     name: Test SDK
-    # SDK is public: keep untrusted pull-request code off the staging host.
-    # Protected main and explicit releases still use the self-hosted runner.
-    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || 'staging1-runner' }}
+    runs-on: [self-hosted, linux, x64, staging1-runner]
     permissions:
       contents: read
     steps:
-      - name: Checkout pull request
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v4
       - name: Checkout from runner-local mirror
-        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
@@ -86,7 +71,7 @@ jobs:
         run: composer validate --strict --no-check-publish
 
       - name: Install dependencies
-        run: composer install --no-interaction --prefer-dist --no-progress
+        run: composer install --no-scripts --no-plugins --no-interaction --prefer-dist --no-progress
 
       - name: Run SDK tests
         run: vendor/bin/phpunit
