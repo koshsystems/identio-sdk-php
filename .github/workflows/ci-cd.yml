@@ -38,11 +38,17 @@ env:
 jobs:
   test:
     name: Test SDK
-    runs-on: [self-hosted, linux, x64, staging1-runner]
+    # SDK is public: keep untrusted pull-request code off the staging host.
+    # Protected main and explicit releases still use the self-hosted runner.
+    runs-on: ${{ github.event_name == 'pull_request' && 'ubuntu-latest' || 'staging1-runner' }}
     permissions:
       contents: read
     steps:
+      - name: Checkout pull request
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
       - name: Checkout from runner-local mirror
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
