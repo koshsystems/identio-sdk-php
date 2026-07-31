@@ -7,7 +7,6 @@ namespace Identio\Sdk\Social;
 use Identio\Sdk\Config\IdentioConfig;
 use Identio\Sdk\Dto\AuthResult;
 use Identio\Sdk\Dto\ProfileValue;
-use Identio\Sdk\Dto\SocialProviderConfig;
 use Identio\Sdk\Dto\SocialStart;
 use Identio\Sdk\Enum\SocialProvider;
 use Identio\Sdk\Http\ApiTransport;
@@ -72,50 +71,6 @@ final readonly class SocialAuthClient
             'registrationToken' => trim($registrationToken),
             'values' => $this->profileValues($values),
         ]);
-    }
-
-    public function config(SocialProvider $provider): SocialProviderConfig
-    {
-        $response = $this->transport->request(
-            'GET',
-            sprintf('%s/social/%s/config', $this->basePath(), $provider->value),
-        );
-
-        if (! is_array($response)) {
-            throw new UnexpectedValueException('Identio social provider response must be a JSON object.');
-        }
-
-        return SocialProviderConfig::fromArray($response);
-    }
-
-    /**
-     * @return list<SocialProviderConfig>
-     */
-    public function configs(?string $clientIp = null): array
-    {
-        $headers = [];
-        if ($this->nullableString($clientIp) !== null) {
-            $headers['X-Userid-Client-Ip'] = trim((string) $clientIp);
-        }
-
-        $response = $this->transport->request(
-            'GET',
-            $this->basePath() . '/social/configs',
-            headers: $headers,
-        );
-
-        if (! is_array($response)) {
-            throw new UnexpectedValueException('Identio social providers response must be a JSON array.');
-        }
-
-        $configs = [];
-        foreach ($response as $item) {
-            if (is_array($item)) {
-                $configs[] = SocialProviderConfig::fromArray($item);
-            }
-        }
-
-        return $configs;
     }
 
     /**

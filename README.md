@@ -127,12 +127,6 @@ $result = $identio->social->completeRegistration(
 );
 ```
 
-## Social provider configuration
-
-```php
-$configs = $identio->social->configs($_SERVER['SERVER_ADDR'] ?? null);
-$config = $identio->social->config(SocialProvider::Vk);
-```
 
 ## Laravel registration
 
