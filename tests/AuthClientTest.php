@@ -15,6 +15,46 @@ use PHPUnit\Framework\TestCase;
 
 final class AuthClientTest extends TestCase
 {
+    public function testImportLegacyPasswordHashUsesTheMigrationEndpointAndPreservesTheHash(): void
+    {
+        $history = [];
+        $mock = new MockHandler([
+            new Response(200, ['Content-Type' => 'application/json'], json_encode([
+                'token' => null,
+                'user' => [
+                    'id' => 8,
+                    'email' => 'user@example.com',
+                    'confirmed' => true,
+                    'active' => true,
+                    'domainId' => 42,
+                    'values' => [],
+                ],
+                'registrationRequired' => false,
+                'registrationToken' => null,
+                'message' => null,
+            ], JSON_THROW_ON_ERROR)),
+        ]);
+        $stack = HandlerStack::create($mock);
+        $stack->push(Middleware::history($history));
+
+        $client = new IdentioClient(
+            new IdentioConfig('https://identio.example', 42, 'domain-token'),
+            new Client(['handler' => $stack]),
+        );
+        $hash = '$2y$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+
+        $result = $client->auth->importLegacyPasswordHash(' USER@EXAMPLE.COM ', $hash);
+
+        self::assertFalse($result->isAuthenticated());
+        self::assertSame(8, $result->user?->id);
+        self::assertSame('/api/external/domains/42/users/import-legacy-password-hash', $history[0]['request']->getUri()->getPath());
+        self::assertSame('Bearer domain-token', $history[0]['request']->getHeaderLine('Authorization'));
+        self::assertSame([
+            'email' => 'user@example.com',
+            'passwordHash' => $hash,
+        ], json_decode((string) $history[0]['request']->getBody(), true, 512, JSON_THROW_ON_ERROR));
+    }
+
     public function testLoginMapsResponseAndUsesDomainToken(): void
     {
         $history = [];

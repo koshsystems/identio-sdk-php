@@ -30,6 +30,24 @@ final readonly class AuthClient
         ]));
     }
 
+    /**
+     * Import an already encoded legacy password for a server-side migration.
+     *
+     * The endpoint is authenticated with the configured domain API token and
+     * never accepts a plaintext password.
+     */
+    public function importLegacyPasswordHash(string $email, string $passwordHash): AuthResult
+    {
+        return $this->authResult($this->transport->request(
+            'POST',
+            $this->basePath() . '/import-legacy-password-hash',
+            [
+                'email' => $this->normalizeEmail($email),
+                'passwordHash' => $passwordHash,
+            ],
+        ));
+    }
+
     public function confirm(string $emailConfirmationCode): AuthResult
     {
         $code = trim($emailConfirmationCode);
