@@ -16,7 +16,6 @@ final readonly class User
         public bool $active,
         public int $domainId,
         public array $values = [],
-        public string $role = 'user',
     ) {
     }
 
@@ -33,11 +32,6 @@ final readonly class User
         }
 
         $email = isset($data['email']) ? strtolower(trim((string) $data['email'])) : null;
-        $role = strtolower(trim((string) ($data['role'] ?? 'user')));
-        if (! in_array($role, ['user', 'support', 'admin'], true)) {
-            $role = 'user';
-        }
-
         return new self(
             id: (int) ($data['id'] ?? 0),
             email: $email === '' ? null : $email,
@@ -45,7 +39,6 @@ final readonly class User
             active: (bool) ($data['active'] ?? false),
             domainId: (int) ($data['domainId'] ?? 0),
             values: $values,
-            role: $role,
         );
     }
 }

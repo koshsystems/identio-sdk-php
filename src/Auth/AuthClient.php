@@ -7,6 +7,7 @@ namespace Identio\Sdk\Auth;
 use Identio\Sdk\Config\IdentioConfig;
 use Identio\Sdk\Dto\AuthResult;
 use Identio\Sdk\Dto\ProfileValue;
+use Identio\Sdk\Dto\User;
 use Identio\Sdk\Http\ApiTransport;
 use UnexpectedValueException;
 
@@ -84,6 +85,39 @@ final readonly class AuthClient
     public function deleteSelf(string $userJwt): void
     {
         $this->transport->request('DELETE', $this->basePath() . '/me', bearerToken: trim($userJwt));
+    }
+
+    /**
+     * Fetch a domain user's profile and ordinary profile values.
+     */
+    public function getUser(int $userId): User
+    {
+        $response = $this->transport->request('GET', $this->basePath() . '/' . $userId);
+
+        if (! is_array($response)) {
+            throw new UnexpectedValueException('Identio user response must be a JSON object.');
+        }
+
+        return User::fromArray($response);
+    }
+
+    /**
+     * Update a domain user's profile values through the protected domain API.
+     * The caller is responsible for authorizing the operation in the host application.
+     *
+     * @param list<ProfileValue> $values
+     */
+    public function updateUser(int $userId, array $values): User
+    {
+        $response = $this->transport->request('PUT', $this->basePath() . '/' . $userId, [
+            'values' => $this->profileValues($values),
+        ]);
+
+        if (! is_array($response)) {
+            throw new UnexpectedValueException('Identio user update response must be a JSON object.');
+        }
+
+        return User::fromArray($response);
     }
 
     private function basePath(): string
