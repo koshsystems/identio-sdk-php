@@ -27,6 +27,7 @@ final class AuthClientTest extends TestCase
                     'confirmed' => true,
                     'active' => true,
                     'domainId' => 42,
+                    'role' => 'support',
                     'values' => [],
                 ],
                 'registrationRequired' => false,
@@ -47,6 +48,7 @@ final class AuthClientTest extends TestCase
         self::assertTrue($result->isAuthenticated());
         self::assertSame(7, $result->user?->id);
         self::assertSame('user@example.com', $result->user?->email);
+        self::assertSame('support', $result->user?->role);
         self::assertSame('/api/external/domains/42/users/login', $history[0]['request']->getUri()->getPath());
         self::assertSame('Bearer domain-token', $history[0]['request']->getHeaderLine('Authorization'));
         self::assertSame('user@example.com', json_decode((string) $history[0]['request']->getBody(), true, 512, JSON_THROW_ON_ERROR)['email']);
