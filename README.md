@@ -82,6 +82,21 @@ $values = [
 ];
 ```
 
+The configured domain API token can also read and update another user's
+ordinary profile values from a server-side administrator integration:
+
+```php
+$user = $identio->auth->getUser(7);
+$updated = $identio->auth->updateUser(7, [
+    ProfileValue::string(fieldId: 88, name: 'role', value: 'support'),
+]);
+```
+
+The host application must authorize the administrator action. The SDK sends a
+regular `GET` or `PUT /api/external/domains/{domainId}/users/{userId}` request;
+the role remains an ordinary Identio profile value and is never a system DTO
+property.
+
 ## Social login
 
 Supported providers are Google, Yandex, VK and Facebook.
