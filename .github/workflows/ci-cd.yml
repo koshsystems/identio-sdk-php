@@ -164,7 +164,7 @@ jobs:
             echo "Missing PORTALKIT_DISPATCH_TOKEN secret." >&2
             exit 1
           fi
-          payload="$(printf '{"event_type":"dependency-released","client_payload":{"dependency":"identio/php-sdk","version":"%s","source_repository":"%s"}}' "$RELEASE_VERSION" "$GITHUB_REPOSITORY")"
+          payload="$(printf '{"event_type":"global-release-train","client_payload":{"component":"identio-sdk","version":"%s","source_repository":"%s"}}' "$RELEASE_VERSION" "$GITHUB_REPOSITORY")"
           curl --fail --silent --show-error \
             --request POST \
             --header 'Accept: application/vnd.github+json' \
