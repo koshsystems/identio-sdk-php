@@ -58,6 +58,15 @@ if ($result->isAuthenticated()) {
 
 ```php
 $result = $identio->auth->login('user@example.com', 'secret-password');
+
+if ($result->isAuthenticated()) {
+    $jwt = $result->token;
+    $identioUser = $result->user;
+} elseif ($result->isRejected()) {
+    // Wrong credentials and other expected login rejections are normal results.
+    $reason = $result->rejection?->message;
+    $code = $result->rejection?->code;
+}
 ```
 
 Other email operations:
@@ -177,6 +186,13 @@ All SDK exceptions inherit from `Identio\Sdk\Exception\IdentioException`.
 - `SocialFlowException`: local OAuth session/state validation failure.
 
 An `ApiException` exposes `statusCode` and the decoded `responseBody`.
+The email `login()` method returns an `AuthResult` with `isRejected() === true`
+for expected credential/account rejections such as a missing user, invalid
+password, unconfirmed email or inactive user. The rejection contains its
+machine-readable `code`, API `message`, HTTP `statusCode` and decoded response
+body. These expected outcomes do not throw exceptions or produce API error
+warnings. Transport failures, server failures, invalid domain credentials and
+other unexpected API responses remain exceptions.
 
 ## Social-provider update callback verification
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Identio\Sdk\Auth;
 
 use Identio\Sdk\Config\IdentioConfig;
+use Identio\Sdk\Dto\AuthRejection;
 use Identio\Sdk\Dto\AuthResult;
 use Identio\Sdk\Dto\ProfileValue;
 use Identio\Sdk\Dto\User;
@@ -43,10 +44,22 @@ final readonly class AuthClient
 
     public function login(string $email, string $password): AuthResult
     {
-        return $this->authResult($this->transport->request('POST', $this->basePath() . '/login', [
+        $response = $this->transport->requestResponse('POST', $this->basePath() . '/login', [
             'email' => $this->normalizeEmail($email),
             'password' => $password,
-        ]));
+        ]);
+
+        if (! $response->isSuccessful()) {
+            $rejection = AuthRejection::fromLoginResponse($response);
+
+            if ($rejection !== null) {
+                return AuthResult::rejected($rejection);
+            }
+
+            $this->transport->throwForResponse($response);
+        }
+
+        return $this->authResult($response->body);
     }
 
     public function forgotPassword(string $email): void

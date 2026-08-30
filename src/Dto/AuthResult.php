@@ -12,7 +12,18 @@ final readonly class AuthResult
         public bool $registrationRequired = false,
         public ?string $registrationToken = null,
         public ?string $message = null,
+        public ?AuthRejection $rejection = null,
     ) {
+    }
+
+    public static function rejected(AuthRejection $rejection): self
+    {
+        return new self(
+            token: null,
+            user: null,
+            message: $rejection->message,
+            rejection: $rejection,
+        );
     }
 
     /**
@@ -32,6 +43,11 @@ final readonly class AuthResult
     public function isAuthenticated(): bool
     {
         return $this->token !== null && $this->user !== null && ! $this->registrationRequired;
+    }
+
+    public function isRejected(): bool
+    {
+        return $this->rejection !== null && ! $this->isAuthenticated();
     }
 
     private static function nullableString(mixed $value): ?string
