@@ -16,6 +16,7 @@ use Identio\Sdk\Exception\ServerException;
 use Identio\Sdk\Exception\TransportException;
 use Identio\Sdk\Exception\ValidationException;
 use JsonException;
+use LogicException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -40,6 +41,30 @@ final readonly class ApiTransport
         ?string $bearerToken = null,
         array $headers = [],
     ): array|int|string|null {
+        $response = $this->requestResponse($method, $path, $json, $bearerToken, $headers);
+
+        if (! $response->isSuccessful()) {
+            $this->throwForResponse($response);
+        }
+
+        return $response->body;
+    }
+
+    /**
+     * Perform a request while preserving an error response for an operation
+     * that has its own business-level rejection contract, such as login.
+     * Network failures still throw TransportException.
+     *
+     * @param array<string, mixed>|null $json
+     * @param array<string, string> $headers
+     */
+    public function requestResponse(
+        string $method,
+        string $path,
+        ?array $json = null,
+        ?string $bearerToken = null,
+        array $headers = [],
+    ): ApiResponse {
         $uri = $this->config->baseUrl . '/' . ltrim($path, '/');
         $requestHeaders = array_merge([
             'Accept' => 'application/json',
@@ -73,22 +98,31 @@ final readonly class ApiTransport
         $body = trim((string) $response->getBody());
         $decoded = $this->decodeBody($body);
 
-        if ($status < 200 || $status >= 300) {
-            $message = is_array($decoded) && is_string($decoded['message'] ?? null)
-                ? trim($decoded['message'])
-                : sprintf('Identio API returned HTTP %d.', $status);
+        return new ApiResponse(
+            method: strtoupper($method),
+            path: $path,
+            statusCode: $status,
+            body: $decoded,
+        );
+    }
 
-            $this->logger->warning('Identio API error', [
-                'method' => strtoupper($method),
-                'path' => $path,
-                'status' => $status,
-                'message' => $message,
-            ]);
-
-            throw $this->apiException($status, $message, is_array($decoded) ? $decoded : null);
+    /**
+     * @throws ApiException
+     */
+    public function throwForResponse(ApiResponse $response): never
+    {
+        if ($response->isSuccessful()) {
+            throw new LogicException('Successful API responses cannot be converted to API exceptions.');
         }
 
-        return $decoded;
+        $this->logger->warning('Identio API error', [
+            'method' => $response->method,
+            'path' => $response->path,
+            'status' => $response->statusCode,
+            'message' => $response->errorMessage(),
+        ]);
+
+        throw $this->apiException($response->statusCode, $response->errorMessage(), $response->responseBody());
     }
 
     /**
