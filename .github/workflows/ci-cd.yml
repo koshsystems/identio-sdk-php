@@ -56,7 +56,8 @@ jobs:
           git init "${GITHUB_WORKSPACE}"
           git -C "${GITHUB_WORKSPACE}" remote add origin "${mirror_path}"
           git -C "${GITHUB_WORKSPACE}" fetch --no-tags origin "${ref_name}"
-          git -C "${GITHUB_WORKSPACE}" checkout --force FETCH_HEAD
+          git -C "${GITHUB_WORKSPACE}" checkout --force "${GITHUB_SHA}"
+          test "$(git -C "${GITHUB_WORKSPACE}" rev-parse HEAD)" = "${GITHUB_SHA}"
 
       - name: Verify PHP and Composer
         run: |
@@ -114,7 +115,8 @@ jobs:
           git -C "${GITHUB_WORKSPACE}" remote add origin "${mirror_path}"
           git -C "${GITHUB_WORKSPACE}" fetch --no-tags origin "${ref_name}"
           git -C "${GITHUB_WORKSPACE}" fetch --tags origin
-          git -C "${GITHUB_WORKSPACE}" checkout --force FETCH_HEAD
+          git -C "${GITHUB_WORKSPACE}" checkout --force "${GITHUB_SHA}"
+          test "$(git -C "${GITHUB_WORKSPACE}" rev-parse HEAD)" = "${GITHUB_SHA}"
 
       - name: Calculate next semantic version
         id: version
