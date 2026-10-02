@@ -101,6 +101,21 @@ final readonly class AuthClient
     }
 
     /**
+     * Delete only an unconfirmed domain user by email through the authenticated
+     * domain API. The endpoint is idempotent for explicitly allowlisted E2E
+     * cleanup.
+     */
+    public function deleteNotConfirmedByEmail(string $email): void
+    {
+        $normalizedEmail = $this->normalizeEmail($email);
+
+        $this->transport->request(
+            'DELETE',
+            $this->basePath() . '/not-confirmed/' . rawurlencode($normalizedEmail),
+        );
+    }
+
+    /**
      * Fetch a domain user's profile and ordinary profile values.
      */
     public function getUser(int $userId): User

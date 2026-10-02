@@ -132,6 +132,27 @@ final class AuthClientTest extends TestCase
         self::assertSame('Bearer domain-token', $history[0]['request']->getHeaderLine('Authorization'));
     }
 
+    public function testDeleteNotConfirmedByEmailUsesTheDomainApiAndNormalizesTheEmail(): void
+    {
+        $history = [];
+        $mock = new MockHandler([
+            new Response(200, ['Content-Type' => 'application/json'], '1'),
+        ]);
+        $stack = HandlerStack::create($mock);
+        $stack->push(Middleware::history($history));
+        $client = new IdentioClient(
+            new IdentioConfig('https://identio.example', 42, 'domain-token'),
+            new Client(['handler' => $stack]),
+        );
+
+        $client->auth->deleteNotConfirmedByEmail(' USER@EXAMPLE.COM ');
+
+        self::assertSame('/api/external/domains/42/users/not-confirmed/user%40example.com', $history[0]['request']->getUri()->getPath());
+        self::assertSame('', $history[0]['request']->getUri()->getQuery());
+        self::assertSame('DELETE', $history[0]['request']->getMethod());
+        self::assertSame('Bearer domain-token', $history[0]['request']->getHeaderLine('Authorization'));
+    }
+
     public function testLoginReturnsMissingUserAsARejectedResultWithoutWarning(): void
     {
         $logger = new RecordingLogger();

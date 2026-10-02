@@ -77,7 +77,13 @@ $identio->auth->forgotPassword('user@example.com');
 $identio->auth->resetPassword($code, $newPassword);
 $identio->auth->updateSelf($userJwt, password: $newPassword, values: []);
 $identio->auth->deleteSelf($userJwt);
+$identio->auth->deleteNotConfirmedByEmail('e2e-account@example.com');
 ```
+
+`deleteNotConfirmedByEmail()` uses the configured server-side domain API token
+and is intended for an explicitly allowlisted cleanup integration. It removes
+only a still-unconfirmed domain user and is idempotent when no such user
+remains; confirmed users cannot be removed through this endpoint.
 
 ## Profile values
 
